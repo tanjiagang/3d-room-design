@@ -3,10 +3,19 @@ import { CSG } from 'three-csg-ts';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OutlinePass } from 'three/examples/jsm/Addons.js';
 import * as dat from 'dat.gui';
-
+// const base = process.env.NODE_ENV === 'production' ? '/3d-room-design/' : '/';
+// const base ='/';
+const base ='/3d-room-design/';
+console.log(base);
 const initData: Array<any> = [];
 
 const loader = new GLTFLoader();
+
+// selectedGroup interface
+interface SelectedGroup extends THREE.Group {
+    isChanged: boolean
+    isNew: boolean
+}
 
 // draw floor
 const drawFloor = () => {
@@ -283,7 +292,7 @@ const drawHall = () => {
     group.add(frame);
 
     // add flowerpot model
-    loader.load('/models/flowerpot.glb', (gltf) => {
+    loader.load(base + 'models/flowerpot.glb', (gltf) => {
         gltf.scene.position.set(120, 10, -20);
         const flowerpot = gltf.scene;
         // console.log(flowerpot);
@@ -299,7 +308,7 @@ const drawHall = () => {
     })
 
     // add desk model
-    loader.load('/models/desk.glb', (gltf) => {
+    loader.load(base + 'models/desk.glb', (gltf) => {
         const desk = gltf.scene;
         desk.scale.set(2, 2, 2);
         desk.position.set(165, 20, -90);
@@ -312,7 +321,7 @@ const drawHall = () => {
     });
 
     // add fruitPlatter
-    loader.load('/models/fruitPlatter.glb', (gltf) => {
+    loader.load(base + 'models/fruitPlatter.glb', (gltf) => {
         const fruitPlatter = gltf.scene;
         fruitPlatter.position.set(150, 60, -80);
         // console.log(flowerpot);
@@ -322,7 +331,7 @@ const drawHall = () => {
         group.add(fruitPlatter);
     });
     // add cups
-    loader.load('/models/cups.glb', (gltf) => {
+    loader.load(base + 'models/cups.glb', (gltf) => {
         const cups = gltf.scene;
         // cups.scale.set(2, 2, 2);
         cups.position.set(160, 60, -90);
@@ -383,7 +392,7 @@ const drawHall = () => {
     group.add(tvGroup);
 
     // load television
-    loader.load('/models/television.glb', (gltf) => {
+    loader.load(base + 'models/television.glb', (gltf) => {
         const tv = gltf.scene;
         tv.scale.set(1.5, 1.5, 1.5);
         tv.position.set(80, 40, -180);
@@ -461,7 +470,7 @@ const drawKitchen = () => {
 
 
     // load kitchen tool
-    loader.load('/models/kitchenTool1.glb', (gltf) => {
+    loader.load(base + 'models/kitchenTool1.glb', (gltf) => {
         const tool = gltf.scene;
         tool.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -474,7 +483,7 @@ const drawKitchen = () => {
         group.add(tool);
     });
     // load kitchen tool2
-    loader.load('/models/kitchenTool2.glb', (gltf) => {
+    loader.load(base + 'models/kitchenTool2.glb', (gltf) => {
         const tool = gltf.scene;
         tool.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -488,7 +497,7 @@ const drawKitchen = () => {
     });
 
     // load exhuast fan
-    loader.load('/models/exhaustFan.glb', (gltf) => {
+    loader.load(base + 'models/exhaustFan.glb', (gltf) => {
         const fan = gltf.scene;
         fan.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -502,7 +511,7 @@ const drawKitchen = () => {
     });
 
     // load fridge
-    loader.load('/models/fridge.glb', (gltf) => {
+    loader.load(base + 'models/fridge.glb', (gltf) => {
         const fridge = gltf.scene;  
         fridge.scale.set(1.2, 1.2, 1.2);
         fridge.rotation.y = Math.PI / 2;
@@ -541,7 +550,7 @@ const drawBedroom = () => {
     group.add(wall4);
 
     // load bed
-    loader.load('/models/bed.glb', (gltf) => {
+    loader.load(base + 'models/bed.glb', (gltf) => {
         const bed = gltf.scene;
         bed.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -564,7 +573,7 @@ const drawBedroom = () => {
     group.add(circleChair2);
 
     // load white chair
-    loader.load('/models/whiteChair.glb', (gltf) => {
+    loader.load(base + 'models/whiteChair.glb', (gltf) => {
         const chair = gltf.scene;
         chair.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -582,7 +591,7 @@ const drawBedroom = () => {
     });
 
     // load green chair
-    loader.load('/models/greenChair.glb', (gltf) => {
+    loader.load(base + 'models/greenChair.glb', (gltf) => {
         const chair = gltf.scene;
         chair.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -596,7 +605,7 @@ const drawBedroom = () => {
     });
 
     // load fruitPlatter
-    loader.load('/models/fruitPlatter.glb', (gltf) => {
+    loader.load(base + 'models/fruitPlatter.glb', (gltf) => {
         const platter = gltf.scene;
         platter.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -652,7 +661,7 @@ const drawBathroom = () => {
     group.add(wall3);
 
     // load sink
-    loader.load('/models/sink.glb', (gltf) => {
+    loader.load(base + 'models/sink.glb', (gltf) => {
         const sink = gltf.scene;
         sink.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -666,7 +675,7 @@ const drawBathroom = () => {
     })
 
     // load toilet
-    loader.load('/models/toilet.glb', (gltf) => {
+    loader.load(base + 'models/toilet.glb', (gltf) => {
         const toilet = gltf.scene;
         toilet.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -681,7 +690,7 @@ const drawBathroom = () => {
 
 
     // load garbege
-    loader.load('/models/garbage.glb', (gltf) => {
+    loader.load(base + 'models/garbage.glb', (gltf) => {
         const garbage = gltf.scene;
         garbage.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -695,7 +704,7 @@ const drawBathroom = () => {
     })
 
     // load bath
-    loader.load('/models/bath.glb', (gltf) => {
+    loader.load(base + 'models/bath.glb', (gltf) => {
         const bath = gltf.scene;
         bath.traverse(child => {
             if (child instanceof THREE.Mesh) child.receiveShadow = true
@@ -740,7 +749,7 @@ const loadManage = () => {
 const selectBuilding = (camera: THREE.Camera, scene: THREE.Scene, outlinePass: OutlinePass) => {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    let selectedGroup: THREE.Group = [];
+    let selectedGroup: THREE.Group = new THREE.Group();
     document.addEventListener('click', function (event) {    
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
@@ -787,7 +796,7 @@ const data = {
     opacity: 1
 };
 let controllers: Array<any> = [];
-const initController = (selectedGroup: THREE.Group, gui: dat.GUI) => {
+const initController = (selectedGroup: SelectedGroup, gui: dat.GUI) => {
     // if(!selectedGroup.children.length) return;
     // mesh properties
     data.rx = selectedGroup.rotation.x;
@@ -820,14 +829,14 @@ const initController = (selectedGroup: THREE.Group, gui: dat.GUI) => {
         })
     }))
 }
-const updateController = (selectedGroup: THREE.Group, gui: dat.GUI, useGroupData: any) => {
+const updateController = (selectedGroup: SelectedGroup, gui: dat.GUI, ) => {
     if(!selectedGroup.children.length) return;
     // remove old controller
     controllers.forEach((item) => {
         gui.remove(item);
     })
     controllers = [];
-    let color: THREE.Color, opacity: number;
+    let color: THREE.Color = new THREE.Color(0xAAAAAA), opacity: number = 1;
     selectedGroup.traverse((child) => {
         if (child instanceof THREE.Mesh) {
             color = child.material.color;
@@ -868,7 +877,8 @@ const updateController = (selectedGroup: THREE.Group, gui: dat.GUI, useGroupData
         })
     }))
 
-
+    // assign isChanged property to group
+    // Object.defineProperty(selectedGroup, 'isChanged', { value: false });
     selectedGroup.isChanged = true;
     // useGroupData.addInitialGroupData({
     //     uuid: selectedGroup.uuid,
@@ -905,7 +915,7 @@ const saveInitialGroupData = (scene: THREE.Scene, useGroupData: any) => {
 }
 
 // reset scene
-const resetScene = (scene: THREE.Scene, useGroupData: any) => {
+const resetScene = (scene: THREE.Scene) => {
     // const initialGroupData = useGroupData.initialGroupData;
     
     // initialGroupData.forEach((item: TGroupData) => {
@@ -922,7 +932,7 @@ const resetScene = (scene: THREE.Scene, useGroupData: any) => {
     //     }
     // })
     initData.forEach((item) => {
-        const group = scene.getObjectByProperty('uuid', item.uuid);
+        const group = scene.getObjectByProperty('uuid', item.uuid) as SelectedGroup;
         // console.log(group?.isChanged);
         if (group && group.isChanged) {
             // console.log(item.position.x);
@@ -935,10 +945,10 @@ const resetScene = (scene: THREE.Scene, useGroupData: any) => {
         }
     })
 
-    const newChildren = [];
+    const newChildren: Array<THREE.Object3D> = [];
     // remove all new models
     scene.traverse((child) => {
-        if (child?.isNew) newChildren.push(child);
+        if ((child as SelectedGroup).isNew) newChildren.push(child);
     })
     newChildren.forEach((child) => {
         scene.remove(child);
@@ -949,7 +959,7 @@ const resetScene = (scene: THREE.Scene, useGroupData: any) => {
 // add model
 const addModel = (scene: THREE.Scene, name: string) => {
     if(name === '沙发1') {
-        const sofa = (scene.getObjectByName('sofaGroup') as THREE.Group).clone();
+        const sofa = (scene.getObjectByName('sofaGroup') as SelectedGroup).clone();
         console.log(sofa);
         // const sofa = drawSofa(90, 50, 50);
         sofa.position.set(5, 30, 45);
@@ -957,7 +967,7 @@ const addModel = (scene: THREE.Scene, name: string) => {
         scene.add(sofa);
     }
     if(name === '柜子1') {
-        const cabinet = (scene.getObjectByName('cabinet') as THREE.Group).clone();
+        const cabinet = (scene.getObjectByName('cabinet') as SelectedGroup).clone();
         cabinet.position.set(-5, 30, 45);
         cabinet.isNew = true;
         scene.add(cabinet);
@@ -978,5 +988,6 @@ export {
     updateController,
     saveInitialGroupData,
     resetScene,
-    addModel
+    addModel,
+    base
 }

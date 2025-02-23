@@ -10,11 +10,10 @@
     <div :class="['side-bar', { 'active': isShowSideBar }]" @mouseenter="showSideBar" @mouseleave="hideSideBar">
         <div class="pointer" ></div>
         <div class="side-bar-item"
-            v-for="item in sideBarItem" :key="item.name"
-            @click="selectBuilding(item.name)">
+            v-for="item in sideBarItem" :key="item.name">
           <span class="side-bar-item-name">{{ item.name }}</span>
           <div class="side-bar-sub-item">
-            <div v-for="subItem in item.subItems" :key="subItem"
+            <div v-for="subItem in item.subItems" :key="subItem.name"
                  class="model-item"
                  @click="addFurniture(subItem.name)">
               <img :src="subItem.imgSrc" alt="">
@@ -26,6 +25,7 @@
 </template>
 
 <script setup lang="ts">
+// @ts-nocheck
 import {  ref, onMounted, useTemplateRef } from 'vue'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -34,16 +34,24 @@ import { GammaCorrectionShader } from 'three/examples/jsm/Addons.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { drawHall, drawKitchen, drawBedroom, drawBathroom, drawFloor,
          initController, updateController, saveInitialGroupData,
-        resetScene, addModel, selectBuilding } from '@/utils/common'
-import { useGlobalState } from '@/hooks/useGlobalState';
-import { useInitialGroupData } from '@/hooks/useGroupData';
+        resetScene, addModel,
+        base } from '../utils/common';
+import { useGlobalState } from '../hooks/useGlobalState';
+import { useInitialGroupData } from '../hooks/useGroupData';
 import { storeToRefs } from 'pinia';
 import * as dat from 'dat.gui';
 // import tween.js
 import {Tween} from '@tweenjs/tween.js'
 
+
+// selectedGroup interface
+interface SelectedGroup extends THREE.Group {
+    isChanged: boolean
+    isNew: boolean
+}
+
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer, controls: OrbitControls,
-    composer: EffectComposer, outlinePass: OutlinePass, selectedGroup: THREE.Group = new THREE.Group(), gui: dat.GUI;
+    composer: EffectComposer, outlinePass: OutlinePass, selectedGroup: SelectedGroup = new THREE.Group(), gui: dat.GUI;
 const canvas = useTemplateRef('canvas')
 // const guiContainer = useTemplateRef('guiContainer');
 const globalState = useGlobalState();
@@ -51,8 +59,8 @@ const useGroupData = useInitialGroupData();
 const { isLoading } = storeToRefs(useGlobalState());
 // side bar item
 const sideBarItem = [
-    { name: '沙发', subItems: [{name: '沙发1', imgSrc: '/images/sofa1.png'}] },
-    { name: '柜子', subItems: [{name: '柜子1', imgSrc: '/images/cabinet1.png'}] },
+    { name: '沙发', subItems: [{name: '沙发1', imgSrc: base + 'images/sofa1.png'}] },
+    { name: '柜子', subItems: [{name: '柜子1', imgSrc: base + 'images/cabinet1.png'}] },
 ]
 let isShowSideBar = ref(false);
 
@@ -60,7 +68,7 @@ const initThree = () => {
     renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true,
-        canvas: canvas.value
+        canvas: canvas.value as HTMLCanvasElement
     });
     renderer.setClearColor(0x000000, 1);
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -78,7 +86,7 @@ const initThree = () => {
 
     // load hdr
     const rgbeLoader = new RGBELoader();
-    rgbeLoader.setPath('/textures/');
+    rgbeLoader.setPath( base + 'textures/');
     rgbeLoader.load('royal_esplanade_1k.hdr', function (texture) {
         texture.mapping = THREE.EquirectangularReflectionMapping;
         scene.background = texture;
@@ -159,6 +167,7 @@ const initThree = () => {
     
     THREE.DefaultLoadingManager.onProgress = function ( url, itemsLoaded, itemsTotal ) {
         if(itemsLoaded == itemsTotal){
+          console.log(url);
           globalState.setIsLoading(false);
           tween.start();
         }  
@@ -192,7 +201,7 @@ const initThree = () => {
             //     selectedGroup = clickedObject.parent;
             // }
             while(!(clickedObject.parent instanceof THREE.Group)){
-                clickedObject = clickedObject.parent;
+                clickedObject = clickedObject.parent as THREE.Group;
             }
             selectedGroup = clickedObject.parent;
 
@@ -225,7 +234,7 @@ const initThree = () => {
                 // selectedObjects.forEach((item) => {
                 //     console.log(item.name);
                 // })
-                updateController(selectedGroup, gui, useGroupData);
+                updateController(selectedGroup, gui);
             }
 
         }
@@ -254,10 +263,10 @@ const initThree = () => {
         selectedGroup.position.copy(target)
     });
 
-    document.addEventListener('pointerup', function (event) {
+    document.addEventListener('pointerup', function () {
         isDragging = false;
         controls.enabled = true;
-        selectedGroup = [];
+        selectedGroup = new THREE.Group();
         outlinePass.selectedObjects = [];
     });
 
@@ -346,7 +355,7 @@ const onWindowResize = () => {
 
 
 const resetSceneOperatoion = () => {
-    resetScene(scene, useGroupData);
+    resetScene(scene);
 }
 
 const showSideBar = () => {
