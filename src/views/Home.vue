@@ -493,7 +493,7 @@ body {
 }
 .reset {
     position: fixed;
-    top: 22.5%;
+    bottom: 55%;
     right: 15px;
     cursor: pointer;
     font-size: 15px;

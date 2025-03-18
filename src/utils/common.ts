@@ -4,10 +4,8 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OutlinePass } from 'three/examples/jsm/Addons.js';
 import * as dat from 'dat.gui';
 // const base = process.env.NODE_ENV === 'production' ? '/3d-room-design/' : '/';
-// const base ='/';
-const base ='/3d-room-design/';
-console.log(base);
-const initData: Array<any> = [];
+const base ='/';
+// const base ='/3d-room-design/';
 
 const loader = new GLTFLoader();
 
@@ -787,7 +785,24 @@ const selectBuilding = (camera: THREE.Camera, scene: THREE.Scene, outlinePass: O
     return selectedGroup;
 }
 
-// modification controller
+// save initial group data
+const initData: Array<TGroupData> = [];
+const addInitialGroupData = (object: THREE.Object3D) => {
+    // deep copy object.children
+    const children: Array<THREE.Object3D> = [];
+    object.children.forEach((item) => {
+        children.push(item);
+    })
+    const data: TGroupData = {
+        uuid: object.uuid,
+        position: { x: object.position.x, y: object.position.y, z: object.position.z },
+        rotation: { x: object.rotation.x, y: object.rotation.y, z: object.rotation.z },
+        children: children
+    }
+    initData.push(data);
+}
+
+// modify controller
 const data = {
     rx: 0,
     ry: 0,
@@ -837,6 +852,7 @@ const updateController = (selectedGroup: SelectedGroup, gui: dat.GUI, ) => {
     })
     controllers = [];
     let color: THREE.Color = new THREE.Color(0xAAAAAA), opacity: number = 1;
+    // set the first child mesh properties as default
     selectedGroup.traverse((child) => {
         if (child instanceof THREE.Mesh) {
             color = child.material.color;
@@ -878,7 +894,8 @@ const updateController = (selectedGroup: SelectedGroup, gui: dat.GUI, ) => {
     }))
 
     // assign isChanged property to group
-    // Object.defineProperty(selectedGroup, 'isChanged', { value: false });
+    // Object.defineProperty(selectedGroup, 'is
+    // Changed', { value: false });
     selectedGroup.isChanged = true;
     // useGroupData.addInitialGroupData({
     //     uuid: selectedGroup.uuid,
@@ -940,8 +957,14 @@ const resetScene = (scene: THREE.Scene) => {
             group.rotation.set(item.rotation.x, item.rotation.y, item.rotation.z);
             // console.log(item);
             group.isChanged = false;
-            // group.clear();
-            // group.add(...item.children);
+            // reset mesh's children
+            if(item.children[0].isObject3D && item.children.length > 0 && item.children[0].isMesh) {
+                group.children = item.children;
+                // console.log(item.children.length);
+                // group.clear();
+                // group.add(...item.children);
+            }
+            
         }
     })
 
