@@ -1,0 +1,78 @@
+#app {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+ul,
+li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+.dg.ac {
+    z-index: 200 !important;
+}
+
+#model-delete-button,
+#model-confirm-button {
+    width: 40px;
+    height: auto;
+    cursor: pointer;
+}
+
+#model-delete-button:hover,
+#model-confirm-button:hover {
+    opacity: 0.8;
+}
+
+/* 移动端 */
+@media screen and (max-width: 768px) {
+    .container {
+        width: 100%;
+    }
+    .hide-mobile {
+        display: none;
+    }
+    .hide-ipad-mobile {
+        display: none;
+    }
+    #model-delete-button, #model-confirm-button {
+        width: 20px;
+    }
+}
+/* ipad端 */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .container {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+    .hide-ipad {
+        display: none;
+    }
+    .hide-ipad-mobile {
+        display: none;
+    }
+    #model-delete-button, #model-confirm-button {
+        width: 20px;
+    }
+}
+/* PC端 */
+@media screen and (min-width: 1025px) {
+    .container {
+        width: 1200px;
+        margin: 0 auto;
+    }
+    .hide-pc {
+        display: none;
+    }
+}
