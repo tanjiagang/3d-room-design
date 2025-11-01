@@ -10,8 +10,10 @@ import { PhysicsWorld } from "./three/physics/WorldManager";
 import CannonDebugger from "cannon-es-debugger";
 import { DragControlsManager } from "./three/DragControlsManager";
 import { LightManager } from "./three/LightManager";
+import ChunkManager from "./three/ChunkManager";
 import { Character } from "./three/objects/Character";
 import * as THREE from "three";
+import { throttle } from 'lodash-es';
 
 const physicsWorld = new PhysicsWorld();
 
@@ -28,6 +30,7 @@ export default class Core {
     charater?: Character;
     orbit_controls!: OrbitControls;
     dragControls!: DragControlsManager;
+    chunkManager!: ChunkManager;
 
     // ui: UI;
     // control_manage: ControlManage;
@@ -56,6 +59,7 @@ export default class Core {
                 this._initDatGui();
             }
             this._initDragControls();
+            this.chunkManager = new ChunkManager(this.scene, this.camera, this.dragControls, 250);
             this.initLight()
         }
         return Core.instance;
@@ -71,6 +75,10 @@ export default class Core {
             // this.cannonDebugger.update();
             this.renderer.render(this.scene, this.camera);
             this.rendererManager.css2Renderer.render(this.scene, this.camera);
+
+            // 分块加载
+            throttle(this.chunkManager.update, 1000)();
+            // this.chunkManager.update()
 
             // 角色动画
             // if(this.charater?.mixer) {

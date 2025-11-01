@@ -1,11 +1,10 @@
 import type { SceneSave, Placement } from './placement';
 import IndexDBUtil from '@/utils/IndexDBUtil';
 const STORAGE_KEY = 'teapot';
-import { Scene } from 'three';
-import { clone, cloneDeep } from 'lodash-es';
+import { Camera, Scene } from 'three';
 import { IndexDbStoreName, IndexDbStoreKeyPath, IndexDbDataName } from '@/enums/indexDb';
-import { OBJExporter  } from 'three/addons/exporters/OBJExporter.js';
-import * as THREE from 'three';
+import ChunkManager from '../three/ChunkManager';
+import type { DragControlsManager } from '../three/DragControlsManager';
 
 
 interface SceneData extends ReturnType<Scene['toJSON']> {
@@ -33,29 +32,31 @@ export class StorageService {
   }
 
   // 保存当前场景
-  async saveScene(scene: Scene, load: number): Promise<Object> {
+  async saveScene(scene: Scene, camera: Camera, dragControls: DragControlsManager, load: number): Promise<Object> {
     return new Promise(async (resolve) => {      
-      // 将场景转为JSON
-      const sceneJson = JSON.parse(JSON.stringify(scene.toJSON()));
-      const jsonData = {
-        load,
-        scene: sceneJson
-      }
-      // 定义indexedDB需要的索引
-      Object.defineProperty(jsonData, IndexDbStoreKeyPath, {
-          value: IndexDbStoreKeyPath,
-          writable: true,
-          enumerable: true
-      })
+      // // 将场景转为JSON
+      // const sceneJson = JSON.parse(JSON.stringify(scene.toJSON()));
+      // const jsonData = {
+      //   load,
+      //   scene: sceneJson
+      // }
+      // // 定义indexedDB需要的索引
+      // Object.defineProperty(jsonData, IndexDbStoreKeyPath, {
+      //     value: IndexDbStoreKeyPath,
+      //     writable: true,
+      //     enumerable: true
+      // })
       
-      // 查询是否有存档
-      let res = await this.indexDBUtil.get(IndexDbStoreName, IndexDbStoreKeyPath)
-      if (res) {
-        res = await this.indexDBUtil.update(IndexDbStoreName, jsonData);
-      } else {
-        res = await this.indexDBUtil.add(IndexDbStoreName, jsonData);
-      }
-      resolve(res as Object);
+      // // 查询是否有存档
+      // let res = await this.indexDBUtil.get(IndexDbStoreName, IndexDbStoreKeyPath)
+      // if (res) {
+      //   res = await this.indexDBUtil.update(IndexDbStoreName, jsonData);
+      // } else {
+      //   res = await this.indexDBUtil.add(IndexDbStoreName, jsonData);
+      // }
+      const chunkManager = new ChunkManager(scene, camera, dragControls, 250);
+      const res = chunkManager.exportChunk();
+      resolve(res);
     })
   }
 

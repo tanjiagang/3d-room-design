@@ -47,7 +47,9 @@ export class Character {
         isTracking: false,
         direction: '',
         distance: { x: 0, y: 0 },
-    }
+    };
+    shaderGroup!: THREE.Group = new THREE.Group(); // 角色特效组
+    shaderMaterials!: THREE.ShaderMaterial[] = []; // 角色特效材质
 
 
     constructor(scene: THREE.Scene, camera: THREE.PerspectiveCamera) {
@@ -108,8 +110,141 @@ export class Character {
 
             this.isActivated = true;
             this.initPhysics();
+            this.initShaders();
         });
 
+    }
+
+    // 初始化流光特效
+    initShaders() {
+        const width = 8, height = 30, lineWidth = .1;
+        const commonUniforms = {
+            uFade: { value: new THREE.Vector2(0, 0.2) },
+            uOffset: { value: new THREE.Vector2(40, 20) },
+        };
+
+        const spline = new THREE.LineCurve3(
+            new THREE.Vector3(0, 0, height * 0.25),
+            new THREE.Vector3(0, 0, height * 0.75)
+        );
+        const geometry = new THREE.TubeGeometry(spline, height, lineWidth, 64);
+        const vertexShader = /* glsl */ `
+    float PI = acos(-1.0);
+    uniform vec2 uOffset;
+    uniform float uDirection;
+    varying vec2 vUv; 
+    float uSpiralRadius = 6.0; // 螺旋半径
+    float uSpiralPitch = 0.01;  // 螺旋螺距
+    float uSpiralTurns = 1.0;  // 螺旋圈数
+
+    float getMove(float u, float offset){ 
+      float a = u * PI * 2.0;
+      return sin(a + PI*0.25) * u * offset;
+    }
+
+    float getHeight(float u, float offset){
+      float a = u * PI * 3.0;
+      return cos(a) * u * offset; 
+    }
+
+
+    void main() {
+      vUv = uv;
+      // float m = getMove(vUv.x, uOffset.x);
+      // float h = getHeight(vUv.x, uOffset.y);
+
+      // vec3 newPosition = position;
+      // newPosition.x += m;
+      // newPosition.y += h;
+
+      float theta = uv.x * 2.0 * PI * uSpiralTurns;
+      if(uDirection == 1.0) {
+        theta += PI;
+      }
+
+      float radius = uSpiralRadius;
+      float x = radius * cos(theta);
+      float y = radius * sin(theta);
+      float z = uSpiralPitch * theta;
+      vec3 newPosition = position;
+      newPosition.x += x;
+      newPosition.y += y;
+      newPosition.z += z;
+
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+    }`;
+
+        const fragmentShader = /* glsl */ `
+    varying vec2 vUv;
+
+    uniform vec2 uOffset;
+    uniform vec2 uFade;
+    uniform vec3 uColor;
+    uniform float uDirection;
+    uniform float uTime;
+    uniform float uSpeed;
+
+    void main() {
+      vec3 color = uColor;
+      // 流动方向
+      float s = -uTime * uSpeed;
+      float v = 0.0;
+      if(uDirection == 1.0) {
+        v = vUv.x;
+      } else {
+        v = vUv.x;
+      }
+
+      float d = mod((v + s), 1.0);
+
+      if(d < uFade.x || d > uFade.y) {
+        discard;
+      } else {
+        float alpha = smoothstep(uFade.x, uFade.y, d);
+        if(alpha < 0.001)
+          discard;
+        gl_FragColor = vec4(color, alpha);
+      }
+    }`;
+
+
+        const amount = 10;
+        // const gap = 8;
+        // const step = (width - gap) / amount;
+        for (let i = 0; i < amount; i++) {
+            const c = new THREE.Color();
+            const v = i / amount;
+            c.setHSL(
+                THREE.MathUtils.lerp(0.7, 0.2, v),
+                1,
+                THREE.MathUtils.lerp(0.5, 1.0, v)
+            );
+
+            const material = new THREE.ShaderMaterial({
+                side: THREE.DoubleSide,
+                transparent: true,
+                uniforms: {
+                    uColor: { value: c },
+                    uTime: { value: THREE.MathUtils.lerp(-1, 1, Math.random()) },
+                    uDirection: { value: i < amount / 2 ? 1 : 0 },
+                    uSpeed: { value: THREE.MathUtils.lerp(1, 1.5, Math.random()) },
+                    ...commonUniforms,
+                },
+                vertexShader,
+                fragmentShader,
+
+            });
+
+            this.shaderMaterials.push(material);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.rotateX(-Math.PI / 2);
+            // mesh.position.x = i * step - width / 2;
+            // mesh.position.y = Math.random() * 5;
+            this.shaderGroup.add(mesh);
+            this.shaderGroup.name = 'shader-group';
+            this.shaderGroup.position.y = -5;
+            this.model.add(this.shaderGroup);
+        }
     }
 
     // 初始化物理引擎
@@ -185,7 +320,7 @@ export class Character {
         document.addEventListener('keyup', this.onKeyUp);
         document.addEventListener('mousemove', this.onMouseMove);
         document.addEventListener('wheel', this.onWheel);
-        
+
         // 添加触摸事件
         document.addEventListener('touchstart', this.touchStart);
         document.addEventListener('touchmove', this.touchMove);
@@ -319,17 +454,17 @@ export class Character {
         const deltaY = currentPos.y - Character.instance.touchObj.lastPos.y;
         Character.instance.touchObj.direction = Character.instance.calculateDirection(deltaX, deltaY);
         Character.instance.touchObj.distance = { x: deltaX, y: deltaY }
-        
-        if(Character.instance.touchObj.direction === 'up') {
+
+        if (Character.instance.touchObj.direction === 'up') {
             Character.instance.keys.W = true;
         }
-        if(Character.instance.touchObj.direction === 'down') {
+        if (Character.instance.touchObj.direction === 'down') {
             Character.instance.keys.S = true;
         }
-        if(Character.instance.touchObj.direction === 'left') {
+        if (Character.instance.touchObj.direction === 'left') {
             Character.instance.keys.A = true;
         }
-        if(Character.instance.touchObj.direction === 'right') {
+        if (Character.instance.touchObj.direction === 'right') {
             Character.instance.keys.D = true;
         }
 
@@ -491,6 +626,16 @@ export class Character {
 
             // 同步当前旋转值
             this.modelRotationX = this.model.rotation.y;
+        }
+
+        // 更新特效动画
+        if (this.shaderMaterials.length > 0) {
+            this.shaderMaterials.forEach(material => {
+                material.uniforms.uTime.value += 0.005;
+                if (material.uniforms.uTime.value > 1) {
+                    material.uniforms.uTime.value = 0;
+                }
+            })
         }
 
     }

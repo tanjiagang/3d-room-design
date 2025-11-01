@@ -61,6 +61,7 @@ import { Character } from '@/core/three/objects/Character'
 import { PhysicsWorld } from '@/core/three/physics/WorldManager'
 import CannonDebugger from "cannon-es-debugger";
 import { githubPagePublicDir } from '@/utils/config'
+import  useDraggableObjects from '@/hooks/useDraggableObjects'
 
 const core = new Core()
 
@@ -70,6 +71,7 @@ const sceneManager = core.sceneManager
 const collisionGroup = new THREE.Group() // 创建一个组，用于添加碰撞体
 
 const useGlobalStore = useGlobalState()
+const useDraggable = useDraggableObjects()
 const dragControls = core.dragControls
 const loadManager = new LoadManager()
 const { isLoading, isInnerLoading, isEditor, dragObject, load } = storeToRefs(useGlobalState())
@@ -105,6 +107,7 @@ const closeEditorPanel = () => {
 
     // 添加加载状态
     useGlobalStore.setIsLoading(true)
+    console.log(core.charater)
     setTimeout(() => {
       // 重新创建八叉树
       core.charater?.worldOctree.fromGraphNode(collisionGroup);
@@ -171,7 +174,10 @@ const saveScene = () => {
 
   // 用setTimeout是为了解决scene.toJson太慢导致卡顿
   setTimeout(() => {
-    sceneManager.saveCurrentScene(load.value).then((result) => {
+    sceneManager.saveCurrentScene(core.camera, core.dragControls, load.value).then((result) => {
+      Promise.all(result).then(() => { 
+        console.log('导出成功')
+      })
       elLoading.value = false
 
       core.scene.add(dragControls.highlightBox)
@@ -331,7 +337,7 @@ function loadCharacterModel() {
 
     // // 添加碰撞体
     // collisionGroup.removeFromParent();
-    // dragControls.draggableObjects.forEach(object => {
+    // useDraggable.draggableObjects.forEach(object => {
     //   collisionGroup.add(object)
     // })
     // collisionGroup.add(dragControls.ground)
@@ -358,7 +364,7 @@ onMounted(() => {
     async () => {
       const jsonData = await storageService.getSave() as { scene: string } // 获取保存的场景数据
 
-      if (jsonData) {
+      if (false) {
         useGlobalStore.setIsLoading(true)
 
         // 解析场景数据
@@ -383,6 +389,7 @@ onMounted(() => {
             //   dragControls.ground = child.children[1].getObjectByName('ground')
             // }
           })
+          // dragControls.removeObject(dragControls.ground) // 移除地面
           // core.cannonDebugger = new (CannonDebugger as any)(core.scene, physicsWorld.world)
           // 在初始化一次拖拽工具类
           dragControls.initController(core.camera, core.renderer, core.orbit_controls, core.scene);
@@ -408,8 +415,9 @@ onMounted(() => {
           })
           // 设置地面
           dragControls.ground = ground
+          // core.chunkManager.update();
+
           // physicsWorld.createGround(dragControls.ground)
-          // core.cannonDebugger = new (CannonDebugger as any)(core.scene, physicsWorld.world)
           // 加载人物模型
           loadCharacterModel();
         })

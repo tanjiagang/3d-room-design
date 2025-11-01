@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import { CSS3DObject, CSS2DObject, DragControls } from 'three/examples/jsm/Addons.js';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { Octree } from 'three/examples/jsm/math/Octree.js';
-import { SceneManger } from './SceneManager';
 import { githubPagePublicDir } from '@/utils/config';
+import useDraggableObjects from '../../hooks/useDraggableObjects';
 
 const raycaster = new THREE.Raycaster();
-const sceneManager = new SceneManger();
+const useDraggable = useDraggableObjects();
 
 export class DragControlsManager {
     static instance: DragControlsManager;
@@ -242,7 +242,7 @@ export class DragControlsManager {
             this.confirmButton.position.set(event.object.position.x + size.x, event.object.position.y, event.object.position.z + size.z);
 
             // 更新存档物体位置
-            sceneManager.updateItem(event.object);
+            // sceneManager.updateItem(event.object);
 
             // this.rotationCircle.visible = true;
         })
@@ -252,6 +252,16 @@ export class DragControlsManager {
     // 添加新的可拖拽对象
     addObject(object: THREE.Object3D) {
         this.draggableObjects.push(object);
+        // useDraggable.addObject(object);
+    }
+
+    // 移除可拖拽对象
+    removeObject(object: THREE.Object3D) {
+        const index = this.draggableObjects.indexOf(object);
+        if (index !== -1) {
+            this.draggableObjects.splice(index, 1);
+        }
+        // useDraggable.removeObject(object);
     }
 
     // 使用BufferGeometry创建拖拽平面geometry

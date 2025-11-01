@@ -5,6 +5,8 @@ import { LoadManager } from './LoadManager';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { PhysicsWorld } from './physics/WorldManager';
 import { githubPagePublicDir } from '@/utils/config';
+import { getSplitedPanorama } from './utils/panoramaTileLoad';
+import type { DragControlsManager } from './DragControlsManager';
 
 
 const loadManager = new LoadManager();
@@ -27,7 +29,7 @@ export class SceneManger {
     init() {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xffffff);
-        if(import.meta.env.MODE === 'development') {
+        if (import.meta.env.MODE === 'development') {
             this.scene.add(new THREE.AxesHelper(100));
         }
         return this.scene;
@@ -77,8 +79,8 @@ export class SceneManger {
     }
 
     // 保存当前场景
-    saveCurrentScene(load: number) {
-        return storageService.saveScene(this.scene,  load);
+    saveCurrentScene(camera: THREE.Camera, dragControls: DragControlsManager, load: number) {
+        return storageService.saveScene(this.scene, camera, dragControls, load);
     }
 
     // 加载场景
@@ -97,13 +99,13 @@ export class SceneManger {
         //     '/textures/skybox/pz.png',
         //     '/textures/skybox/nz.png'
         // ];
-        this.createSkybox(githubPagePublicDir + '/textures/sky_linekotsi_15_b_HDRI.hdr');
+        this.createSkybox(githubPagePublicDir + '/textures/panorama.hdr');
         const placedItems = this.placedItems;
         const modelPromises = placedItems.map(placement => {
             return loadManager.load(placement.url);
         });
 
-        modelPromises.push(loadManager.load(githubPagePublicDir + '/models/village_landscape2.glb'));
+        modelPromises.push(loadManager.load(githubPagePublicDir + '/models/village_landscape4.glb'));
 
         Promise.all(
             // [
@@ -147,12 +149,38 @@ export class SceneManger {
 
     // create skybox using hdr
     createSkybox(url: string) {
-        const loader = new RGBELoader();
-        loader.load(url, (texture) => {
-            texture.mapping = THREE.EquirectangularReflectionMapping;
-            this.scene.background = texture;
-            this.scene.environment = texture;
-        });
+        // const loader = new RGBELoader();
+        // loader.load(url, (texture) => {
+        //     texture.mapping = THREE.EquirectangularReflectionMapping;
+        //     this.scene.background = texture;
+        //     this.scene.environment = texture;
+        // });
+        getSplitedPanorama(
+            4, 4,
+            [
+                '/textures/panorama_tile/tile_0_0.png',
+                '/textures/panorama_tile/tile_0_1.png',
+                '/textures/panorama_tile/tile_0_2.png',
+                '/textures/panorama_tile/tile_0_3.png',
+                '/textures/panorama_tile/tile_1_0.png',
+                '/textures/panorama_tile/tile_1_1.png',
+                '/textures/panorama_tile/tile_1_2.png',
+                '/textures/panorama_tile/tile_1_3.png',
+                '/textures/panorama_tile/tile_2_0.png',
+                '/textures/panorama_tile/tile_2_1.png',
+                '/textures/panorama_tile/tile_2_2.png',
+                '/textures/panorama_tile/tile_2_3.png',
+                '/textures/panorama_tile/tile_3_0.png',
+                '/textures/panorama_tile/tile_3_1.png',
+                '/textures/panorama_tile/tile_3_2.png',
+                '/textures/panorama_tile/tile_3_3.png'
+            ],
+            (texture) => {
+                texture.mapping = THREE.EquirectangularReflectionMapping;
+                this.scene.background = texture;
+                this.scene.environment = texture;
+            }
+        )
     }
 
     dispose() {
