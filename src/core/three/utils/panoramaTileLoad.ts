@@ -1,3 +1,4 @@
+import { githubPagePublicDir } from '@/utils/config';
 import * as THREE from 'three';
 export const getSplitedPanorama = function (
     rows: number,
@@ -25,7 +26,7 @@ export const getSplitedPanorama = function (
 
             // 加载单个小图
             const loader = new THREE.TextureLoader();
-            loader.load(tilePaths[i * cols + j], function (loadedTexture) {
+            loader.load(githubPagePublicDir + tilePaths[i * cols + j], function (loadedTexture: THREE.Texture) {
                textures[i * cols + j] = loadedTexture;
                loadedCount++;
 
