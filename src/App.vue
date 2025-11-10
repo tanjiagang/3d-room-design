@@ -7,13 +7,14 @@
 
 <style>
 /* reset css */
-html,
+/* html,
 body,
 #app {
   margin: 0;
   padding: 0;
   width: 100%;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 ul,
 li {
@@ -25,21 +26,30 @@ a {
   text-decoration: none;
   color: inherit;
 }
+.dg.ac {
+  z-index: 200 !important;
+}
+#model-delete-button, #model-confirm-button {
+  width: 40px;
+  height: auto;
+  cursor: pointer;
+}
+#model-delete-button:hover, #model-confirm-button:hover {
+  opacity: 0.8;
+} */
 /* dat.gui */
 .dg.main {
-  position: fixed;
+  /* position: fixed;
   top: 0;
-  right: 0;
-  z-index: 100;
-  background-color: #f0d4af;
+  right: 0; */
+  
+  /* background-color: #f0d4af;
   color: #333;
   font: 14px 'Lucida Grande', sans-serif;
-  text-shadow: none;
-  /* width: 300px; */
+  text-shadow: none; */
 }
+/*
 .dg.main li:not(.folder) {
-    /* background: #ffffff;
-    border-bottom: 1px solid #2fa1d6; */
     background: #f0d4af;
     border-bottom: 1px solid #846033;
 }
@@ -81,5 +91,5 @@ a {
 :global(.dg li:not(.folder)) {
     background: #ffffff;
     border-bottom: 1px solid #409eff;
-}
+} */
 </style>
