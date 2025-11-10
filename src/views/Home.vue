@@ -51,25 +51,6 @@ import { useGlobalState } from '@/hooks/useGlobalState'
 import Core from '@/core/index'
 import { storeToRefs } from 'pinia'
 import * as THREE from 'three'
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { RenderPass, EffectComposer, OutlinePass, ShaderPass } from 'three/examples/jsm/Addons.js';
-import { GammaCorrectionShader } from 'three/examples/jsm/Addons.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
-import { drawHall, drawKitchen, drawBedroom, drawBathroom, drawFloor,
-         initController, updateController, saveInitialGroupData,
-        resetScene, addModel,
-        base } from '../utils/common';
-import { useGlobalState } from '../hooks/useGlobalState';
-import { useInitialGroupData } from '../hooks/useGroupData';
-import { storeToRefs } from 'pinia';
-import * as dat from 'dat.gui';
-// import tween.js
-import {Tween} from '@tweenjs/tween.js'
-=======
-=======
->>>>>>> develop
 import { LoadManager } from '@/core/three/LoadManager'
 import { ElMessage } from 'element-plus'
 import { StorageService } from '@/core/game/StorageService'
@@ -81,10 +62,6 @@ import { PhysicsWorld } from '@/core/three/physics/WorldManager'
 import CannonDebugger from "cannon-es-debugger";
 import { githubPagePublicDir } from '@/utils/config'
 import  useDraggableObjects from '@/hooks/useDraggableObjects'
-<<<<<<< HEAD
->>>>>>> 259bb6c (add chunk load, shader)
-=======
->>>>>>> develop
 
 const core = new Core()
 
@@ -141,35 +118,9 @@ const closeEditorPanel = () => {
 
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer, controls: OrbitControls,
-    composer: EffectComposer, outlinePass: OutlinePass, selectedGroup: SelectedGroup = new THREE.Group(), gui: dat.GUI;
-const canvas = useTemplateRef('canvas')
-// const guiContainer = useTemplateRef('guiContainer');
-const globalState = useGlobalState();
-const useGroupData = useInitialGroupData();
-const { isLoading } = storeToRefs(useGlobalState());
-// side bar item
-const sideBarItem = [
-    { name: '沙发', subItems: [{name: '沙发1', imgSrc: base + 'images/sofa1.png'}] },
-    { name: '柜子', subItems: [{name: '柜子1', imgSrc: base + 'images/cabinet1.png'}] },
-]
-let isShowSideBar = ref(false);
-=======
-const useGlobalStore = useGlobalState()
-const useDraggable = useDraggableObjects()
-const dragControls = core.dragControls
-const loadManager = new LoadManager()
-const { isLoading, isInnerLoading, isEditor, dragObject, load } = storeToRefs(useGlobalState())
-const elLoading = ref(false) // 加载动画
-const isLandScape = ref(false)
->>>>>>> 259bb6c (add chunk load, shader)
-=======
 // 打开编辑面板
 const openEditorPanel = () => {
   useGlobalStore.setIsEditor(true)
->>>>>>> develop
 
   document.addEventListener('keydown', onkeydown) // 添加编辑模式键盘事件
   core.dragControls.dragControls.enabled = true // 开启拖拽
@@ -252,18 +203,6 @@ const saveScene = () => {
 
   // const result = sceneManager.saveCurrentScene('application/json')
 
-<<<<<<< HEAD
-=======
-
-    // 添加加载状态
-    useGlobalStore.setIsLoading(true)
-    console.log(core.charater)
-    setTimeout(() => {
-      // 重新创建八叉树
-      core.charater?.worldOctree.fromGraphNode(collisionGroup);
-      useGlobalStore.setIsLoading(false)
-    }, 0);
->>>>>>> 259bb6c (add chunk load, shader)
 
 
 }
@@ -411,168 +350,11 @@ function loadCharacterModel() {
 
 }
 
-<<<<<<< HEAD
-// const initControls = (scene: THREE.Scene, controls: OrbitControls, outlinePass: OutlinePass, selectedGroup: THREE.Object3D[]) => {
-//     let dragControls = new DragControls(selectedGroup, camera, canvas.value);
-
-//     dragControls.addEventListener('dragstart', function (event) {
-//         controls.enabled =false;
-//         outlinePass.selectedObjects = [event.object];
-//     });
-
-//     dragControls.addEventListener('dragend', function (event) {
-//         outlinePass.selectedObjects = [];
-//         controls.enabled =true;
-//     });
-//     // controls = new OrbitControls(camera, canvas.value);
-// }
-
-// const updateGroups = (node: THREE.Object3D) => {
-//     if(!node) return;
-//     for(let i = 0 ; i < node.children.length; i++) {
-//         updateGroups(node.children[i]);
-//     }
-//     if(node.isGroup) {
-//         node.boundingBox = new THREE.Box3().setFromObject(node);
-//         node.raycast = function(raycaster , intersects) {
-//             let vClosest = new THREE.Vector3();
-//             let bIntersect = raycaster.ray.intersectBox(node.boundingBox , vClosest) !== null;
-//             if(bIntersect) {
-//                 let distance = raycaster.ray.origin.distanceTo(vClosest);
-//                 if(distance < raycaster.near || distance > raycaster.far) return;
-//                 let intersection = {
-//                     distance: distance,
-//                     distanceToRay: 0,
-//                     point: vClosest,
-//                     index: null,
-//                     face: null,
-//                     object: node
-//                 }
-//                 // intersects.push(intersection);
-//                 return true;
-//             }
-
-//         }
-//     }
-//     return false;
-// }
-
-<<<<<<< HEAD
-// draw floor
-=======
-  // 删除不需要保存的模型
-  core.scene.remove(dragControls.highlightBox)
-  core.scene.remove(dragControls.deleteButton.removeFromParent())
-  core.scene.remove(dragControls.confirmButton.removeFromParent())
-  // core.charater?.characterBoxHelper.removeFromParent()
-  // core.charater?.start.removeFromParent()
-  // core.charater?.end.removeFromParent()
-  // core.charater?.mesh.removeFromParent()
-  core.charater?.model.removeFromParent()
-
-  // 用setTimeout是为了解决scene.toJson太慢导致卡顿
-  setTimeout(() => {
-    sceneManager.saveCurrentScene(core.camera, core.dragControls, load.value).then((result) => {
-      Promise.all(result).then(() => { 
-        console.log('导出成功')
-      })
-      elLoading.value = false
-
-      core.scene.add(dragControls.highlightBox)
-      core.scene.add(dragControls.deleteButton)
-      core.scene.add(dragControls.confirmButton)
-
-      if (result) {
-        ElMessage.success({
-          message: '保存成功',
-          type: 'success'
-        })
-      } else {
-        ElMessage.error({
-          message: '保存失败',
-          type: 'error'
-        })
-      }
-
-      // 恢复角色
-      core.scene.add(core.charater.model)
-    })
-  }, 1000)
-
-  // const result = sceneManager.saveCurrentScene('application/json')
->>>>>>> 259bb6c (add chunk load, shader)
-
-
-const onWindowResize = () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
-}
-
-
-const resetSceneOperatoion = () => {
-    resetScene(scene);
-}
-
-<<<<<<< HEAD
-const showSideBar = () => {
-    isShowSideBar.value = true
-}
-const hideSideBar = () => {
-    isShowSideBar.value = false
-=======
-// 加载人物模型
-function loadCharacterModel() {
-  core.charater = new Character(core.scene, core.camera)
-  core.charater.worldOctree.fromGraphNode(dragControls.ground)
-  // 开启人物控制
-  if (core.charater) {
-    core.charater.removeKeyEvent()
-    // document.removeEventListener('keydown', onkeydown) // 移除编辑模式键盘事件
-    // core.dragControls.dragControls.enabled = false // 禁用dragControls
-    core.orbit_controls.enabled = false // 禁止鼠标控制
-    // core.charater.cameraGroup.add(core.camera)
-    
-    // core.camera.position.set(0, 0, 0)
-    // core.charater.cameraGroup.position.set(0, 20, -40)
-    // core.charater.addKeyEvent() // 添加角色相关事件
-    // core.charater.isActivated = true
-
-    // // 添加碰撞体
-    // collisionGroup.removeFromParent();
-    // useDraggable.draggableObjects.forEach(object => {
-    //   collisionGroup.add(object)
-    // })
-    // collisionGroup.add(dragControls.ground)
-    
-    // core.scene.add(collisionGroup)
-    // // 重新创建八叉树
-    // core.charater.worldOctree.fromGraphNode(collisionGroup);
-
-  }
-
->>>>>>> 259bb6c (add chunk load, shader)
-}
-
-// add furniture
-const addFurniture = (name: string) => {
-  addModel(scene, name);
-}
-
-onMounted(() => {
-<<<<<<< HEAD
-    initThree();
-    // insert gui dom to #app
-    document.getElementById('app')?.appendChild(gui.domElement);
-=======
-=======
 const handleResize = () => {
   isLandScape.value = window.innerWidth > window.innerHeight;
 }
 
 onMounted(() => {
->>>>>>> develop
 
   useGlobalStore.setIsLoading(true)
 
@@ -658,10 +440,6 @@ onMounted(() => {
 
 onBeforeMount(() => { 
   window.removeEventListener('resize', handleResize)
-<<<<<<< HEAD
->>>>>>> 259bb6c (add chunk load, shader)
-=======
->>>>>>> develop
 })
 </script>
 <style scoped lang="less">
